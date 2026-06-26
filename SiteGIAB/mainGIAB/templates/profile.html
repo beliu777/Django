@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIA B — документы практики</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Arial, sans-serif;min-height:100vh;background:#101418;color:#18202a;padding:28px;background-image:radial-gradient(circle at 20% 10%,rgba(46,204,113,.24),transparent 28%),radial-gradient(circle at 80% 0%,rgba(52,152,219,.22),transparent 26%),linear-gradient(135deg,#101418,#17212b 60%,#0f171f)}
+        .shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:310px 1fr;gap:22px}
+        .side{background:#eef4ee;border-radius:28px;padding:28px;box-shadow:0 18px 45px rgba(0,0,0,.25);position:sticky;top:24px;height:max-content}
+        .brand{font-size:36px;font-weight:900;letter-spacing:2px;color:#10251a;margin-bottom:8px}
+        .side p{color:#5b6c60;line-height:1.5;margin-bottom:24px}
+        .user-card{background:#fff;border:1px solid #dce7dd;border-radius:20px;padding:16px;margin-bottom:18px}
+        .user-card b{display:block;color:#1c7c43;margin-top:5px}
+        .nav-actions{display:grid;gap:10px}.mini-link{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:12px 14px;background:#dfe9e2;color:#203428;font-weight:700}.logout{background:#ffe3de;color:#9f2b1c}.admin{background:#dceeff;color:#1a5276}
+        .main{background:#f8faf6;border-radius:30px;box-shadow:0 18px 45px rgba(0,0,0,.22);overflow:hidden}
+        .hero{padding:30px 34px;background:linear-gradient(120deg,#d8f3dc,#b7e4c7 55%,#cde8f6);border-bottom:1px solid #c5dbc9}.hero h1{font-size:30px;color:#10251a;margin-bottom:8px}.hero p{color:#476452}
+        .content{padding:30px 34px}.message{border-radius:16px;padding:14px 16px;margin-bottom:18px;background:#e4f6e8;border:1px solid #bde6c5;color:#245531}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.field{background:white;border:1px solid #e4ece6;border-radius:18px;padding:14px}.field label{display:block;font-size:13px;font-weight:800;color:#385142;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}.field input,.field select{width:100%;border:0;background:#f3f7f4;border-radius:12px;padding:12px 14px;font-size:15px;color:#152018}.field input:focus,.field select:focus{outline:2px solid #74c69d;background:white}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.btn{border:0;border-radius:16px;padding:13px 20px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;transition:.2s}.btn:hover{transform:translateY(-2px)}.save{background:#2d6a4f;color:white}.reset{background:#f2cc8f;color:#3f2d13}.download{background:#1d3557;color:white}.section{margin-top:28px;padding-top:24px;border-top:1px dashed #bfd0c3}.section h2{font-size:22px;margin-bottom:10px;color:#10251a}.hint{color:#66766a;margin-bottom:15px}.download-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.download-row .btn{text-align:center}
+        @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static}.form-grid{grid-template-columns:1fr}.download-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="side">
+        <div class="brand">GIA B</div>
+        <p>Панель подготовки документов по практике. Заполните поля один раз и скачайте нужный файл.</p>
+        <div class="user-card">Пользователь<b>{{ current_user }}</b></div>
+        <div class="nav-actions">
+            <a class="mini-link logout" href="{% url 'logout' %}">Выйти</a>
+            {% if user.is_superuser %}<a class="mini-link admin" href="{% url 'admin:index' %}">Django-админка</a>{% endif %}
+        </div>
+    </aside>
+    <main class="main">
+        <div class="hero"><h1>Анкета для документов</h1><p>Данные сохраняются автоматически перед скачиванием файла.</p></div>
+        <div class="content">
+            {% if messages %}{% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}{% endif %}
+            <form method="post" id="data-form">{% csrf_token %}
+                <div class="form-grid">
+                    <div class="field"><label>Фамилия</label><input type="text" name="familia" value="{{ data.familia|default:'' }}" placeholder="Иванов"></div>
+                    <div class="field"><label>Имя</label><input type="text" name="name" value="{{ data.name|default:'' }}" placeholder="Иван"></div>
+                    <div class="field"><label>Отчество</label><input type="text" name="otchestvo" value="{{ data.otchestvo|default:'' }}" placeholder="Иванович"></div>
+                    <div class="field"><label>Тип практики</label><select name="tip"><option value="Учебной" {% if data.tip == "Учебной" %}selected{% endif %}>Учебной</option><option value="Производственной" {% if data.tip == "Производственной" %}selected{% endif %}>Производственной</option><option value="Преддипломной" {% if data.tip == "Преддипломной" %}selected{% endif %}>Преддипломной</option></select></div>
+                    <div class="field"><label>Тип практики заглавными</label><input type="text" name="tip_title" value="{{ data.tip_title|default:'' }}" placeholder="УЧЕБНОЙ"></div>
+                    <div class="field"><label>ФИО в родительном падеже</label><input type="text" name="fio_genitive" value="{{ data.fio_genitive|default:'' }}" placeholder="Иванова Ивана Ивановича"></div>
+                    <div class="field"><label>Модуль</label><input type="text" name="module" value="{{ data.module|default:'' }}" placeholder="ПМ.01"></div>
+                    <div class="field"><label>Код модуля</label><input type="text" name="module_code" value="{{ data.module_code|default:'' }}" placeholder="ПМ.01"></div>
+                    <div class="field"><label>Специальность</label><input type="text" name="specialization" value="{{ data.specialization|default:'' }}" placeholder="09.02.07 Информационные системы"></div>
+                    <div class="field"><label>Курс</label><input type="number" name="kurs" value="{{ data.kurs|default:'' }}" min="1" max="6" placeholder="2"></div>
+                    <div class="field"><label>Группа</label><input type="text" name="group" value="{{ data.group|default:'' }}" placeholder="ИС-25"></div>
+                    <div class="field"><label>Дата начала</label><input type="text" name="date_begin" value="{{ data.date_begin|default:'' }}" placeholder="10.06.2026"></div>
+                    <div class="field"><label>Дата окончания</label><input type="text" name="date_finish" value="{{ data.date_finish|default:'' }}" placeholder="25.06.2026"></div>
+                    <div class="field"><label>Руководитель от техникума</label><input type="text" name="head1" value="{{ data.head1|default:'' }}" placeholder="ФИО руководителя"></div>
+                    <div class="field"><label>Руководитель от организации</label><input type="text" name="head2" value="{{ data.head2|default:'' }}" placeholder="ФИО руководителя"></div>
+                    <div class="field"><label>Руководитель практики</label><input type="text" name="ruc_pract" value="{{ data.ruc_pract|default:'' }}" placeholder="ФИО руководителя"></div>
+                    <div class="field"><label>Год</label><input type="number" name="year" value="{{ data.year|default:'2026' }}" min="2020" max="2030" placeholder="2026"></div>
+                </div>
+                <div class="actions"><button type="submit" name="save" class="btn save">Сохранить</button><button type="submit" name="reset" formnovalidate class="btn reset">Сбросить</button></div>
+            </form>
+            <div class="section"><h2>Скачать готовый документ</h2><p class="hint">Нажмите нужную кнопку — данные из формы попадут в шаблон Word.</p><div class="download-row"><button form="data-form" type="submit" name="download" value="title" class="btn download">Титульный лист</button><button form="data-form" type="submit" name="download" value="assignment" class="btn download">Задание</button><button form="data-form" type="submit" name="download" value="diary" class="btn download">Дневник</button></div></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
